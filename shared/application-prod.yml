@@ -1,0 +1,59 @@
+# =============================================================================
+# SHARED CONFIGURATION FILES
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# shared/application-prod.yml (Production Shared Configuration)
+# -----------------------------------------------------------------------------
+spring:
+  profiles: prod
+  
+  # Database Configuration
+  datasource:
+    hikari:
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      maximum-pool-size: 15
+      minimum-idle: 5
+      pool-name: ${spring.application.name}-cp
+      leak-detection-threshold: 60000
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+# Eureka Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_SERVERS:http://eureka-1:8761/eureka/,http://eureka-2:8761/eureka/,http://eureka-3:8761/eureka/}
+    prefer-same-zone-eureka: true
+  instance:
+    hostname: ${HOSTNAME:${spring.application.name}}
+    non-secure-port-enabled: false
+    secure-port-enabled: true
+    secure-port: ${server.port}
+
+# Management Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: never
+
+# Logging Configuration
+logging:
+  level:
+    com.retailstore: INFO
+    org.springframework.security: WARN
+    root: WARN
+  file:
+    name: /app/logs/${spring.application.name}.log
+    max-size: 10MB
+    max-history: 30

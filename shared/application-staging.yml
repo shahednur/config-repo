@@ -1,0 +1,38 @@
+# =============================================================================
+# SHARED CONFIGURATION FILES
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# shared/application-staging.yml (Staging Shared Configuration)
+# -----------------------------------------------------------------------------
+spring:
+  profiles: staging
+  
+  # Database Configuration
+  datasource:
+    hikari:
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1800000
+      maximum-pool-size: 8
+      minimum-idle: 3
+      pool-name: ${spring.application.name}-cp
+  
+  # JPA Configuration
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+
+# Eureka Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service-staging:8761/eureka/
+
+# Logging Configuration
+logging:
+  level:
+    com.retailstore: INFO
+    org.springframework.security: INFO
+    root: WARN

@@ -1,0 +1,132 @@
+
+# =============================================================================
+# SHARED CONFIGURATION FILES
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# shared/application.yml (Global Default Configuration)
+# -----------------------------------------------------------------------------
+# Common configuration shared across all microservices
+# Server Configuration
+server:
+  shutdown: graceful
+  tomcat:
+    connection-timeout: 20000
+    keep-alive-timeout: 15000
+
+# Spring Boot Configuration
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  
+  # Jackson Configuration
+  jackson:
+    default-property-inclusion: NON_NULL
+    serialization:
+      write-dates-as-timestamps: false
+      fail-on-empty-beans: false
+    deserialization:
+      fail-on-unknown-properties: false
+      accept-single-value-as-array: true
+  
+  # JPA Configuration
+  jpa:
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        use_sql_comments: false
+        jdbc:
+          batch_size: 25
+        order_inserts: true
+        order_updates: true
+  
+  # Redis Configuration
+  data:
+    redis:
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+# Management & Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: when-authorized
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+      environment: ${spring.profiles.active:default}
+
+# Logging Configuration
+logging:
+  pattern:
+    console: "%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"
+  level:
+    org.springframework.security: WARN
+    org.springframework.web: WARN
+    org.hibernate: WARN
+    com.zaxxer.hikari: WARN
+    org.apache.kafka: WARN
+
+# Eureka Client Configuration
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    registry-fetch-interval-seconds: 30
+    eureka-service-url-poll-interval-seconds: 300
+    eureka-server-read-timeout-seconds: 8
+    eureka-server-connect-timeout-seconds: 5
+    eureka-server-total-connections: 200
+    eureka-server-total-connections-per-host: 50
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+# Circuit Breaker Configuration
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        failure-rate-threshold: 50
+        slow-call-rate-threshold: 100
+        slow-call-duration-threshold: 60000
+        permitted-number-of-calls-in-half-open-state: 3
+        minimum-number-of-calls: 5
+        wait-duration-in-open-state: 30000
+        sliding-window-type: count-based
+        sliding-window-size: 10
+  retry:
+    configs:
+      default:
+        max-attempts: 3
+        wait-duration: 1000
+  timelimiter:
+    configs:
+      default:
+        timeout-duration: 5000
